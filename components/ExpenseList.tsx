@@ -26,16 +26,16 @@ export const ExpenseList: React.FC<ExpenseListProps> = ({
   const [desc, setDesc] = useState('');
   const [amount, setAmount] = useState('');
   const [payerKey, setPayerKey] = useState('');
-  const [participantIds, setParticipantIds] = useState<string[]>([]);
+  const [participantIds, setParticipantIds] = useState<string[]>(people.map(p => p.id));
   const [editingId, setEditingId] = useState<string | null>(null);
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
 
   useEffect(() => {
-    if (participantIds.length === 0 && people.length > 0 && !editingId) {
+    if (!editingId && !isFormOpen) {
       setParticipantIds(people.map(p => p.id));
     }
-  }, [people, editingId]);
+  }, [people, editingId, isFormOpen]);
 
   const toggleParticipant = (id: string) => {
     setParticipantIds(prev =>

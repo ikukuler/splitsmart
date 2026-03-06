@@ -10,6 +10,7 @@ interface SidebarProps {
   onAddGroup: (name: string, memberIds: string[]) => void;
   onUpdateGroup: (id: string, name: string, memberIds: string[]) => void;
   onRemoveGroup: (id: string) => void;
+  onClearAllData: () => void;
   className?: string;
 }
 
@@ -21,12 +22,14 @@ export const Sidebar: React.FC<SidebarProps> = ({
   onAddGroup, 
   onUpdateGroup, 
   onRemoveGroup, 
+  onClearAllData,
   className 
 }) => {
   const [personName, setPersonName] = useState('');
   const [groupName, setGroupName] = useState('');
   const [selectedMembers, setSelectedMembers] = useState<string[]>([]);
   const [editingGroupId, setEditingGroupId] = useState<string | null>(null);
+  const [isClearModalOpen, setIsClearModalOpen] = useState(false);
 
   const handleAddPerson = () => {
     if (personName.trim()) {
@@ -173,6 +176,51 @@ export const Sidebar: React.FC<SidebarProps> = ({
           </div>
         </section>
       </div>
+
+      <div className="p-4 border-t border-slate-100 bg-slate-50">
+        <button 
+          onClick={() => setIsClearModalOpen(true)}
+          className="w-full flex items-center justify-center gap-2 py-3 px-4 bg-red-50 text-red-600 hover:bg-red-100 rounded-xl text-xs font-bold transition-all border border-red-100"
+        >
+          <i className="fas fa-trash-sweep text-sm"></i>
+          Clear All Data
+        </button>
+      </div>
+
+      {/* Clear All Data Confirmation Modal */}
+      {isClearModalOpen && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm" onClick={() => setIsClearModalOpen(false)} />
+          <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-sm overflow-hidden animate-in fade-in zoom-in duration-200">
+            <div className="p-6 text-center">
+              <div className="w-16 h-16 bg-red-50 text-red-500 rounded-full flex items-center justify-center mx-auto mb-4">
+                <i className="fas fa-exclamation-triangle text-2xl"></i>
+              </div>
+              <h3 className="text-xl font-bold text-slate-800 mb-2">Clear all data?</h3>
+              <p className="text-slate-500 text-sm mb-6">
+                This will permanently delete all people, groups, and transactions. This action cannot be undone.
+              </p>
+              <div className="flex gap-3">
+                <button
+                  onClick={() => setIsClearModalOpen(false)}
+                  className="flex-1 px-4 py-3 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-xl transition-colors text-sm"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={() => {
+                    onClearAllData();
+                    setIsClearModalOpen(false);
+                  }}
+                  className="flex-1 px-4 py-3 bg-red-600 hover:bg-red-700 text-white font-bold rounded-xl transition-colors shadow-lg shadow-red-200 text-sm"
+                >
+                  Clear All
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

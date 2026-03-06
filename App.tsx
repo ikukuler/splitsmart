@@ -1,16 +1,21 @@
-
-import React, { useState, useMemo } from 'react';
+import React, { useMemo } from 'react';
 import { Person, Group, Expense } from './types';
 import { Sidebar } from './components/Sidebar';
 import { ExpenseList } from './components/ExpenseList';
 import { SettlementPane } from './components/SettlementPane';
 import { calculateBalancesAndSettlements } from './services/calculationService';
+import { saveData, loadData, clearData } from './services/persistenceService';
 
 export default function App() {
-  const [people, setPeople] = useState<Person[]>([]);
-  const [groups, setGroups] = useState<Group[]>([]);
-  const [expenses, setExpenses] = useState<Expense[]>([]);
-  const [activeTab, setActiveTab] = useState<'squad' | 'ledger' | 'settle'>('ledger');
+  const initialData = useMemo(() => loadData(), []);
+  const [people, setPeople] = React.useState<Person[]>(initialData.people);
+  const [groups, setGroups] = React.useState<Group[]>(initialData.groups);
+  const [expenses, setExpenses] = React.useState<Expense[]>(initialData.expenses);
+  const [activeTab, setActiveTab] = React.useState<'squad' | 'ledger' | 'settle'>('ledger');
+
+  React.useEffect(() => {
+    saveData(people, groups, expenses);
+  }, [people, groups, expenses]);
 
   const onAddPerson = (name: string) => {
     setPeople(prev => [...prev, { id: `p-${Date.now()}`, name }]);
@@ -55,6 +60,13 @@ export default function App() {
     setExpenses(prev => prev.filter(e => e.id !== id));
   };
 
+  const onClearAllData = () => {
+    setPeople([]);
+    setGroups([]);
+    setExpenses([]);
+    clearData();
+  };
+
   const hasUnpaid = useMemo(() => expenses.some(e => !e.isPaid), [expenses]);
 
   const { balances, individualSettlements, groupSettlements } = useMemo(() => {
@@ -72,6 +84,7 @@ export default function App() {
         onAddGroup={onAddGroup} 
         onUpdateGroup={onUpdateGroup} 
         onRemoveGroup={onRemoveGroup}
+        onClearAllData={onClearAllData}
       />
       <main className="flex-1 flex overflow-hidden">
         <ExpenseList 
